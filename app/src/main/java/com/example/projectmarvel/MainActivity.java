@@ -29,11 +29,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        showlist();
         makeApiCall();
 
     }
-    private void showlist(){
+    private void showlist(List<Results> caracList){
         recyclerView = (RecyclerView) findViewById(R.id.Recycler_View);
         // use this setting to
         // improve performance if you know that changes
@@ -43,11 +42,7 @@ public class MainActivity extends AppCompatActivity {
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        List<String> input = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            input.add("Test" + i);
-        }// define an adapter
-        mAdapter = new ListAdapter(input);
+        mAdapter = new ListAdapter(caracList);
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -70,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<RestMarvelResponse> call, Response<RestMarvelResponse> response) {
                 if(response.isSuccessful() && response.body()!=null) {
                     RestMarvelResponse marvelResponse = response.body();
-                    Toast.makeText(getApplicationContext(), "API SUCCESS", Toast.LENGTH_SHORT).show();
+                    showlist(marvelResponse.getData().getResults());
                 }else{
                      showError();
                 }
