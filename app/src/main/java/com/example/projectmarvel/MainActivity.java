@@ -4,12 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,14 +28,37 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ListAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private SharedPreferences sharedPreferences;
+    private Gson gson;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        makeApiCall();
-
+        sharedPreferences = getSharedPreferences("application_esiea", Context.MODE_PRIVATE);
+        gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        List<Results> resultsList = getDataFromCache();
+        if(resultsList != null) {
+            showlist(resultsList);
+        }else{
+            makeApiCall();
+        }
     }
+
+    private List<Results> getDataFromCache() {
+         String jsonResults =sharedPreferences.getString(Constants.KEY_RESULTS_LIST, null);
+
+         if(jsonResults==null){
+             return null;
+         } else {
+             Type listType = new TypeToken<List<Results>>() {}.getType();
+             List<Results> osef =gson.fromJson(jsonResults, listType);
+             return osef;
+         }
+    }
+
     private void showlist(List<Results> caracList){
         recyclerView = (RecyclerView) findViewById(R.id.Recycler_View);
         // use this setting to
@@ -48,9 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void makeApiCall(){
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -65,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<RestMarvelResponse> call, Response<RestMarvelResponse> response) {
                 if(response.isSuccessful() && response.body()!=null) {
                     RestMarvelResponse marvelResponse = response.body();
+                    savelist(marvelResponse.getData().getResults());
                     showlist(marvelResponse.getData().getResults());
                 }else{
                      showError();
@@ -75,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
                 showError();
             }
         });
+
+    }
+
+    private void savelist(List<Results> resultsList) {
+        String jsonString = gson.toJson(resultsList);
+        sharedPreferences
+                .edit()
+                .putString(Constants.KEY_RESULTS_LIST, jsonString)
+                .apply();
+        Toast.makeText(getApplicationContext(), "list saved" ,Toast.LENGTH_SHORT).show();
 
     }
 
