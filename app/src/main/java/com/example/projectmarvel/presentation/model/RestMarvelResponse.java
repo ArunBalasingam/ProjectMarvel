@@ -1,6 +1,4 @@
-package com.example.projectmarvel;
-
-import java.util.List;
+package com.example.projectmarvel.presentation.model;
 
 public class RestMarvelResponse {
     private Integer code;

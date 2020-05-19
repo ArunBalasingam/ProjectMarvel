@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ProjectMarvel</string>
+    <string name="detail_txt_description">Ecran Detail</string>
 </resources>

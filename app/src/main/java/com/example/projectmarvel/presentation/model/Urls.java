@@ -1,4 +1,4 @@
-package com.example.projectmarvel;
+package com.example.projectmarvel.presentation.model;
 
 public class Urls {
     private String type;

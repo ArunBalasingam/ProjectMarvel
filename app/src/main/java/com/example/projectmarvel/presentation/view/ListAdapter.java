@@ -1,4 +1,4 @@
-package com.example.projectmarvel;
+package com.example.projectmarvel.presentation.view;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,10 +7,19 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.projectmarvel.R;
+import com.example.projectmarvel.presentation.model.Results;
+
 import java.util.List;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private List<Results> values;
+    private OnItemClickListener listener;
+
+
+    public interface OnItemClickListener {
+        void onItemClick(Results item);
+    }
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -40,8 +49,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ListAdapter(List<Results> myDataset) {
-        values = myDataset;
+    public ListAdapter(List<Results> myDataset, OnItemClickListener listener) {
+        this.values = myDataset;
+        this.listener = listener;
+    }
+
+    public void setListener(OnItemClickListener listener){
+        this.listener = listener;
     }
 
     // Create new views (invoked by the layout manager)
@@ -66,6 +80,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         final Results currentResults = values.get(position);
         holder.txtHeader.setText(currentResults.getName());
         holder.txtFooter.setText( currentResults.getResourceURI());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                listener.onItemClick(currentResults);
+            }
+        });
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -1,4 +1,6 @@
-package com.example.projectmarvel;
+package com.example.projectmarvel.presentation.model;
+
+import com.example.projectmarvel.presentation.model.Results;
 
 import java.util.List;
 

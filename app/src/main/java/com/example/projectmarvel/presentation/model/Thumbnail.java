@@ -1,4 +1,4 @@
-package com.example.projectmarvel;
+package com.example.projectmarvel.presentation.model;
 
 public class Thumbnail {
     private String path;
