@@ -11,7 +11,9 @@ import android.widget.Toast;
 
 import com.example.projectmarvel.Constants;
 import com.example.projectmarvel.R;
+import com.example.projectmarvel.Singletons;
 import com.example.projectmarvel.data.MarvelAPI;
+import com.example.projectmarvel.presentation.controller.MainController;
 import com.example.projectmarvel.presentation.model.RestMarvelResponse;
 import com.example.projectmarvel.presentation.model.Results;
 import com.google.gson.Gson;
@@ -28,42 +30,29 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    static final String BASE_URL = "https://gateway.marvel.com/";
+
     private RecyclerView recyclerView;
     private ListAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
-    private SharedPreferences sharedPreferences;
-    private Gson gson;
+
+
+    private MainController controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        sharedPreferences = getSharedPreferences("application_esiea", Context.MODE_PRIVATE);
-        gson = new GsonBuilder()
-                .setLenient()
-                .create();
-        List<Results> resultsList = getDataFromCache();
-        if(resultsList != null) {
-            showlist(resultsList);
-        }else{
-            makeApiCall();
-        }
+        controller= new MainController(
+                this,
+                Singletons.getGson(),
+                Singletons.getSharedPreferences(getApplicationContext() ));
+        controller.onStart();
+
     }
 
-    private List<Results> getDataFromCache() {
-         String jsonResults =sharedPreferences.getString(Constants.KEY_RESULTS_LIST, null);
 
-         if(jsonResults==null){
-             return null;
-         } else {
-             Type listType = new TypeToken<List<Results>>() {}.getType();
-             List<Results> osef =gson.fromJson(jsonResults, listType);
-             return osef;
-         }
-    }
 
-    private void showlist(List<Results> caracList){
+    public void showlist(List<Results> caracList){
         recyclerView = (RecyclerView) findViewById(R.id.Recycler_View);
         // use this setting to
         // improve performance if you know that changes
@@ -78,46 +67,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void makeApiCall(){
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        MarvelAPI marvelAPI = retrofit.create(MarvelAPI.class);
-
-        Call<RestMarvelResponse> call = marvelAPI.getMarvelResponse();
-        call.enqueue(new Callback<RestMarvelResponse>() {
-            @Override
-            public void onResponse(Call<RestMarvelResponse> call, Response<RestMarvelResponse> response) {
-                if(response.isSuccessful() && response.body()!=null) {
-                    RestMarvelResponse marvelResponse = response.body();
-                    savelist(marvelResponse.getData().getResults());
-                    showlist(marvelResponse.getData().getResults());
-                }else{
-                     showError();
-                }
-            }
-            @Override
-            public void onFailure(Call<RestMarvelResponse> call, Throwable t) {
-                showError();
-            }
-        });
-
-    }
-
-    private void savelist(List<Results> resultsList) {
-        String jsonString = gson.toJson(resultsList);
-        sharedPreferences
-                .edit()
-                .putString(Constants.KEY_RESULTS_LIST, jsonString)
-                .apply();
-        Toast.makeText(getApplicationContext(), "list saved" ,Toast.LENGTH_SHORT).show();
-
-    }
-
-    private void showError(){
+    public void showError(){
         Toast.makeText(getApplicationContext(), "API ERROR" ,Toast.LENGTH_SHORT).show();
     }
 
