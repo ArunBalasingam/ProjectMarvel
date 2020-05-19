@@ -84,7 +84,9 @@ public class MainController {
 
     }
 
-    public void onItemClick(Results results){}
+    public void onItemClick(Results results){
+        view.navigateToDetails(results);
+    }
 
 
 }
